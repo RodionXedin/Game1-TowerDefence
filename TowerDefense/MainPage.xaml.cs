@@ -37,8 +37,8 @@ namespace TowerDefense
             Initialise();
 
             BitmapImage unitImg = ImageFromRelativePath(this, "Assets/unit.png");
-            BitmapImage towerImg = ImageFromRelativePath(this, "Assets/tower.png");
-            BitmapImage bulletImg = ImageFromRelativePath(this, "Assets/bullet.png");
+            BitmapImage towerImg = ImageFromRelativePath(this, "Assets/tower2.png");
+            BitmapImage bulletImg = ImageFromRelativePath(this, "Assets/mario_fireball.png");
 
             BitmapImage mapImg = ImageFromRelativePath(this, "Assets/map.png");
 
@@ -99,12 +99,20 @@ namespace TowerDefense
 
         private void GameLoop(object sender, object e)
         {
+            
             game.update();
+            if (game.gameFinished == true)
+                gameGoing.Text = "Game Over";
+            else
+            {
             surviversText.Text = "Survivers: " + game.survivers;
             killsText.Text = "Kills: " + game.kills;
             pointsText.Text = "Points: " + game.points;
             healthText.Text = "Monster Health: " + game.health;
+            towercostText.Text = "Tower cost: " + game.towerCost;
+            towerdamageText.Text = "Tower damage: " + game.damage;
             _gameLoop.Begin();
+            }
         }
 
         public static BitmapImage ImageFromRelativePath(FrameworkElement parent, string path)

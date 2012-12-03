@@ -53,6 +53,7 @@ namespace TowerDefense
                 if (args.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: Load state from previously suspended application
+                    TowerDefense.Game.ContinueGame();
                 }
 
                 // Place the frame in the current Window
@@ -84,6 +85,7 @@ namespace TowerDefense
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
+            TowerDefense.Game.SuspendGame();
             deferral.Complete();
         }
     }

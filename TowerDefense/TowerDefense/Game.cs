@@ -30,13 +30,15 @@ namespace TowerDefense.TowerDefense
         BitmapImage unitImg;
         BitmapImage towerImg;
         public double health = 100;
-
-        private int shotDelay = 40;
-
+        public double damage = 15;
+        public double handicap = 0.4;
+        private int shotDelay = 80;
         public double points = 10;
-        private int towerCost = 10;
-
+        public double towerCost = 10;
+        private int lastupgrade = 0;
         private int unitCounter = 0;
+        public bool gameFinished = false;
+        public static bool Susp = false;
 
         public Game(Canvas canvas, BitmapImage unitImg, BitmapImage towerImg, BitmapImage bulletImg)
         {
@@ -79,136 +81,177 @@ namespace TowerDefense.TowerDefense
 
         public void addTower(double x, double y)
         {
-            if (points >= 10)
+            if (points >= towerCost)
             {
-                points -= 10;
+                points -= towerCost;
                 towers.Add(new Tower(gameCanvas, (int)x, (int)y, 5, shotDelay, 200, towerImg));
-                if (shotDelay > 15)
-                {
-                    shotDelay--;
-                }
             }
         }
 
-        public void update() {
-            delayCount++;
-
-            if (unitCounter >= 10)
+        private void upgradeTowers()
+        {
+            damage *= 1.01;
+            if (shotDelay > 15)
             {
-                health *= 1.1;
-                unitCounter = 0;
+                shotDelay--;
             }
-
-            if (delayCount == delay)
+            foreach (Tower tower in towers)
             {
-                units.Add(new Unit(gameCanvas, 158, 0, unitImg, path, health));
-                units.Add(new Unit(gameCanvas, 158, -60, unitImg, path, health));
-                units.Add(new Unit(gameCanvas, 158, -120, unitImg, path, health));
-                units.Add(new Unit(gameCanvas, 158, -180, unitImg, path, health));
-                delayCount = 0;
+               tower.upgradeShotDelay(shotDelay);
             }
-		    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        public static void ContinueGame()
+        {
+            Susp = false;
+        }
+        public static void SuspendGame()
+        {
+            Susp = true;
+        }
 
-            //new MessageDialog("fff").ShowAsync();
-
-
-		    for(var i = 0; i < this.towers.Count; ++i) {	
-			    this.towers[i].update();
-
-                bool isBreak = false;
-                for (var j = 0; j < this.units.Count; ++j)
+        public void update()
+        {
+            if (Susp == false)
+            {
+                delayCount++;
+                if (survivers >= 20)
+                    gameFinished = true;
+                if (unitCounter >= 10)
                 {
-                    if (this.units[j].x > (this.towers[i].x)
-                        && this.units[j].x < (this.towers[i].x + 30)
-                        && this.units[j].y > (this.towers[i].y)
-                        && this.units[j].y < (this.towers[i].y + 30)
-                        )
+                    health *= 1.1;
+                    unitCounter *= 0;
+                }
+                if (kills - lastupgrade >= 30)
+                {
+                    lastupgrade = kills;
+                    upgradeTowers();
+                    towerCost *= 1.1;
+                }
+                // In the moment when we cannot build more towers , we will upgrade what we have for 100 points 
+                if (points > 100)
+                {
+                    upgradeTowers();
+                }
+                if (delayCount == delay)
+                {
+                    units.Add(new Unit(gameCanvas, 158, 0, unitImg, path, health));
+                    units.Add(new Unit(gameCanvas, 158, -60, unitImg, path, health));
+                    units.Add(new Unit(gameCanvas, 158, -120, unitImg, path, health));
+                    units.Add(new Unit(gameCanvas, 158, -180, unitImg, path, health));
+                    delayCount = 0;
+                }
+                //ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                //new MessageDialog("fff").ShowAsync();
+
+
+                for (var i = 0; i < this.towers.Count; ++i)
+                {
+                    this.towers[i].update();
+
+                    bool isBreak = false;
+                    for (var j = 0; j < this.units.Count; ++j)
                     {
-                        gameCanvas.Children.Remove(this.towers[i].rect);
-                        towers.Remove(this.towers[i]);
-                        i--;
-                        isBreak = true;
+                        if (this.units[j].x > (this.towers[i].x)
+                            && this.units[j].x < (this.towers[i].x + 30)
+                            && this.units[j].y > (this.towers[i].y)
+                            && this.units[j].y < (this.towers[i].y + 30)
+                            )
+                        {
+                            gameCanvas.Children.Remove(this.towers[i].rect);
+                            towers.Remove(this.towers[i]);
+                            i--;
+                            isBreak = true;
+                        }
+                    }
+
+                    if (isBreak)
+                        continue;
+
+                    for (var j = 0; j < this.units.Count; ++j)
+                    {
+                        if (this.units[j].x > (this.towers[i].x - this.towers[i].radius)
+                            && this.units[j].x < (this.towers[i].x + this.towers[i].radius)
+                            && this.units[j].y > (this.towers[i].y - this.towers[i].radius)
+                            && this.units[j].y < (this.towers[i].y + this.towers[i].radius)
+                            )
+                        {
+                            // TODO: calculate bullet path
+                            // ...
+                            // this.towers.shot(vx, vy);
+                            Bullet bullet = towers[i].shot(this.units[j].x, this.units[j].y);
+                            if (bullet != null)
+                            {
+                                bullet.setImage(gameCanvas, bulletImg);
+                                bullets.Add(bullet);
+                            }
+                        }
                     }
                 }
 
-                if (isBreak)
-                    continue;
-
-			    for(var j = 0; j < this.units.Count; ++j) {
-				    if(this.units[j].x > (this.towers[i].x - this.towers[i].radius)
-					    && this.units[j].x < (this.towers[i].x + this.towers[i].radius)
-					    && this.units[j].y > (this.towers[i].y - this.towers[i].radius)
-					    && this.units[j].y < (this.towers[i].y + this.towers[i].radius)
-					    ) {
-					    // TODO: calculate bullet path
-					    // ...
-					    // this.towers.shot(vx, vy);
-					    Bullet bullet = towers[i].shot(this.units[j].x, this.units[j].y);
-                        if (bullet != null)
-                        {
-                            bullet.setImage(gameCanvas, bulletImg);
-                            bullets.Add(bullet);
-                        }
-				    } 
-			    }
-		    }
-
-		    for(var i = 0; i < this.units.Count; ++i) {
-			    this.units[i].update();
-			    if(this.units[i].isFinish) {
-				    //this.units.splice(i, 1);
-                    
-                    gameCanvas.Children.Remove(this.units[i].rect);
-                    units.Remove(this.units[i]);
-                    i--;
-                    survivers++;
-                }
-                else if (this.units[i].isDead)
+                for (var i = 0; i < this.units.Count; ++i)
                 {
-                    
-                    kills++;
-                    points += ((double)health * 0.002);
-                    unitCounter++;
+                    this.units[i].update();
+                    if (this.units[i].isFinish)
+                    {
+                        //this.units.splice(i, 1);
 
-                    gameCanvas.Children.Remove(this.units[i].rect);
-                    units.Remove(this.units[i]);
-                    i--;
+                        gameCanvas.Children.Remove(this.units[i].rect);
+                        units.Remove(this.units[i]);
+                        i--;
+                        survivers++;
+                    }
+                    else if (this.units[i].isDead)
+                    {
+
+                        kills++;
+                        points += ((double) (1 + survivers)*handicap + (health/kills)*0.01 + 0.5);
+                        handicap /= 1 + survivers;
+                        unitCounter++;
+                        gameCanvas.Children.Remove(this.units[i].rect);
+                        units.Remove(this.units[i]);
+                        i--;
+                    }
+
+
                 }
 
 
-		    }
 
+                for (var i = 0; i < this.bullets.Count; ++i)
+                {
+                    if (this.bullets[i].x > 0 && this.bullets[i].x < 500
+                        && this.bullets[i].y > 0 && this.bullets[i].y < 500)
+                        this.bullets[i].update();
+                    else
+                    {
 
-
-            for (var i = 0; i < this.bullets.Count; ++i)
-            {
-			    if(this.bullets[i].x > 0 && this.bullets[i].x < 500
-				    && this.bullets[i].y > 0 && this.bullets[i].y < 500)
-				    this.bullets[i].update();
-			    else {
-                    
-                    gameCanvas.Children.Remove(this.bullets[i].rect);
-                    bullets.Remove(this.bullets[i]);
-                    i--;
-				    continue;
-			    }
-
-			    for(var j = 0; j < this.units.Count; ++j) {
-				    if(this.bullets[i].x > this.units[j].x - this.units[j].size() /  2
-					    && this.bullets[i].x < this.units[j].x + this.units[j].size() / 2
-					    && this.bullets[i].y > this.units[j].y - this.units[j].size() / 2 
-					    && this.bullets[i].y < this.units[j].y + this.units[j].size() / 2) {
-                        
                         gameCanvas.Children.Remove(this.bullets[i].rect);
                         bullets.Remove(this.bullets[i]);
-                        this.units[j].health -= 10;
                         i--;
-					    break;
-				    }
-					
-			    }
-		    }
-	    }
+                        continue;
+                    }
 
+                    for (var j = 0; j < this.units.Count; ++j)
+                    {
+                        if (this.bullets[i].x > this.units[j].x - this.units[j].size()/2
+                            && this.bullets[i].x < this.units[j].x + this.units[j].size()/2
+                            && this.bullets[i].y > this.units[j].y - this.units[j].size()/2
+                            && this.bullets[i].y < this.units[j].y + this.units[j].size()/2)
+                        {
+
+                            gameCanvas.Children.Remove(this.bullets[i].rect);
+                            bullets.Remove(this.bullets[i]);
+                            this.units[j].health -= damage;
+                            i--;
+                            break;
+                        }
+
+                    }
+                }
+            }
+
+        }
     }
+
 }

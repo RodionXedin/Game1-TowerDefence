@@ -14,7 +14,10 @@
                 <TextBlock  x:Name="healthText" Margin="700,30,0,0" Foreground="Black" FontSize="14" Text="health"/>
             <TextBlock  x:Name="killsText" Margin="700,50,0,0" Foreground="Black" FontSize="14" Text="kills"/>
             <TextBlock  x:Name="pointsText" Margin="700,80,0,0" Foreground="Black" FontSize="14" Text="points"/>
-           
+            <TextBlock  x:Name="towercostText" Margin="700,110,0,0" Foreground="Black" FontSize="14" Text="tower cost"/>
+            <TextBlock  x:Name="towerdamageText" Margin="700,140,0,0" Foreground="Black" FontSize="14" Text="tower damage"/>
+            <TextBlock  x:Name="gameGoing" Margin="700,170,0,0" Foreground="Black" FontSize="14" Text=""/>
+
 
         </Canvas>
 

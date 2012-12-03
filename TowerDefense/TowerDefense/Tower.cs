@@ -33,8 +33,8 @@ namespace TowerDefense.TowerDefense
             rect.Fill = imgBrush;
             rect.SetValue(Canvas.LeftProperty, x);
             rect.SetValue(Canvas.TopProperty, y);
-            rect.Width = 27;
-            rect.Height = 47;
+            rect.Width = 45;
+            rect.Height = 65;
             canvas.Children.Add(rect);
 
 	        this.x = x;
@@ -44,6 +44,10 @@ namespace TowerDefense.TowerDefense
 	        this.bulletVelocity = v;
 	        this.delay = delay;
 	        this.shotDelayCount = delay;
+        }
+        public void upgradeShotDelay(int ShotDelay)
+        {
+            this.delay = ShotDelay;
         }
 
 	    public Bullet shot(int unitX, int unitY) {

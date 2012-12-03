@@ -47,8 +47,8 @@ namespace TowerDefense.TowerDefense
             //rect.Fill = brush;
             rect.SetValue(Canvas.LeftProperty, x);
             rect.SetValue(Canvas.TopProperty, y);
-            rect.Width = 4;
-            rect.Height = 4;
+            rect.Width = 20;
+            rect.Height = 20;
             canvas.Children.Add(rect);
         }
 
