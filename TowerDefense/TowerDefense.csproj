@@ -110,6 +110,7 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TowerDefense\Bullet.cs" />
     <Compile Include="TowerDefense\Game.cs" />
     <Compile Include="TowerDefense\Tower.cs" />
     <Compile Include="TowerDefense\Unit.cs" />
@@ -121,11 +122,15 @@
     <None Include="TowerDefense_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\bullet.png" />
     <Content Include="Assets\Logo.png" />
+    <Content Include="Assets\map.png" />
     <Content Include="Assets\SmallLogo.png" />
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\img.png" />
+    <Content Include="Assets\tower.png" />
+    <Content Include="Assets\unit.png" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

@@ -9,6 +9,8 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
 
+using Windows.UI.Xaml.Media.Imaging;
+
 namespace TowerDefense.TowerDefense
 {
     interface GameObject
@@ -16,76 +18,89 @@ namespace TowerDefense.TowerDefense
         void draw(Canvas canvas);
     }
 
-    class Unit : GameObject
+    class Unit
     {
-        private Point position;
-        private List<Point> path;
-        private int currStep = 0;
-        private bool finish = false;
-        private double velocity = 0.2;
-        private double moveCount = 0;
-        private double moveLength = 0;
-        private int directionX = 1;
-        private int directionY = 0;
-        private Rectangle rect = new Rectangle();
+        public int x, y, vx, vy, velocity, stepIndex;
+        public bool isFinish;
+        public bool isDead = false;
+        public Rectangle rect;
+        List<Point> path;
+        public double health;
 
-        public Unit(int x, int y, List<Point> path, ImageBrush imBrush)
+        public Unit(Canvas canvas, int x, int y, BitmapImage img, List<Point> path, double health)
         {
-            this.position = new Point(x, y);
-            this.path = path;
-            rect.Fill = imBrush;
-           
-        }
+            this.health = health;
 
-        public void draw(Canvas canvas)
-        {
-            update();
+            ImageBrush imgBrush = new ImageBrush();
+            imgBrush.ImageSource = img;
+            this.rect = new Rectangle();
+            rect.Fill = imgBrush;
+            rect.SetValue(Canvas.LeftProperty, x);
+            rect.SetValue(Canvas.TopProperty, y);
+            rect.Width = 72;
+            rect.Height = 72;
             canvas.Children.Add(rect);
+
+	        this.x = x;
+	        this.y = y;
+	        this.vx = 0;
+	        this.vy = 0;
+	        this.velocity = 2;
+	        this.path = path;
+	        this.isFinish = false;
+	        this.stepIndex = 0;
         }
 
-        public bool isFinish()
-        {
-            return finish;
-        }
+	    public int size() {
+		    //return this.img.width;
+            return 72;
+	    }
 
-        private void update()
-        {
+	    private void _nextStep() {
+		    if(this.isFinish)
+			    return;
+            
+		    Point currStep = path[this.stepIndex];
+		    if(this.x == currStep.X && this.y == currStep.Y) {
+			    if(this.stepIndex == path.Count - 1) {
+				    this.isFinish = true;
+				    //console.log('finish');
+				    return;
+			    }
+			    currStep = path[++this.stepIndex];
+		    }
 
-            if (currStep < path.Count - 1)
+		    if(this.x > currStep.X)
+				    this.vx = -1;
+		    else if(this.x < currStep.X)
+				    this.vx = 1;
+		    else
+				    this.vx = 0;
+
+		    if(this.y > currStep.Y)
+				    this.vy = -1;
+		    else if(this.y < currStep.Y)
+				    this.vy = 1;
+		    else
+				    this.vy = 0;
+            
+
+		    this.x += this.vx * this.velocity;
+		    this.y += this.vy * this.velocity;
+	    }
+
+	    public void update() {
+            if (health <= 0)
             {
-                if (moveCount < moveLength)
-                {
-                    position.X += directionX * velocity;
-                    position.Y += directionY * velocity;
-                    moveCount++;
-                }
-                else
-                {
-                    currStep++;
-                    double dx = path[currStep].X - position.X;
-                    double dy = path[currStep].Y - position.Y;
-                    if(dx == 0)
-                        directionX = 0;
-                    else if(dx > 0)
-                        directionX = 1;
-                    else if(dx < 0)
-                        directionX = -1;
-
-                    if(dy == 0)
-                        directionY = 0;
-                    else if(dx > 0)
-                        directionY = 1;
-                    else if(dx < 0)
-                        directionY = -1;
-                    
-                    moveCount = 0;
-                    position = path[currStep - 1];
-                    moveLength = dx != 0 ? dx : dy;
-                }
+                this.isDead = true;
             }
-            else
-                finish = true;
-        }
+		    if(!this.isFinish && !this.isDead) {
+			    this._nextStep();
+                rect.SetValue(Canvas.LeftProperty, this.x - this.size() / 2);
+                rect.SetValue(Canvas.TopProperty, this.y - this.size() / 2);
+			    //ctx.drawImage(this.img, this.x - this.img.width / 2, this.y -  this.img.width / 2);
+		    }
+	    }
 
     }
 }

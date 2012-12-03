@@ -8,7 +8,15 @@
     mc:Ignorable="d">
 
     <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
-        <Canvas Name="gameCanvas"  HorizontalAlignment="Left" Height="270" Margin="0,0,0,0" VerticalAlignment="Top" Width="600" LayoutUpdated="gameCanvas_LayoutUpdated"/>
+        <Canvas Name="gameCanvas"  HorizontalAlignment="Left" Height="500" VerticalAlignment="Top" Width="1254" Background="Aqua" LayoutUpdated="gameCanvas_LayoutUpdated" Tapped="gameCanvas_Tapped">
+
+            <TextBlock  x:Name="surviversText" Margin="700,10,0,0" Foreground="Black" FontSize="14" Text="health"/>
+                <TextBlock  x:Name="healthText" Margin="700,30,0,0" Foreground="Black" FontSize="14" Text="health"/>
+            <TextBlock  x:Name="killsText" Margin="700,50,0,0" Foreground="Black" FontSize="14" Text="kills"/>
+            <TextBlock  x:Name="pointsText" Margin="700,80,0,0" Foreground="Black" FontSize="14" Text="points"/>
+           
+
+        </Canvas>
 
     </Grid>
 </Page>
