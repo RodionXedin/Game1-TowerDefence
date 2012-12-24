@@ -127,6 +127,7 @@
     <Content Include="Assets\Logo.png" />
     <Content Include="Assets\map.png" />
     <Content Include="Assets\Mario_fireball.png" />
+    <Content Include="Assets\tile.png" />
     <Content Include="Assets\tower2.png" />
     <Content Include="Assets\SmallLogo.png" />
     <Content Include="Assets\SplashScreen.png" />

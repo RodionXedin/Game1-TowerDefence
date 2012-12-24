@@ -31,7 +31,7 @@ namespace TowerDefense.TowerDefense
         private int tileWidth = 40;
         BitmapImage unitImg;
         BitmapImage towerImg;
-        BitmapImage pathImage;
+        BitmapImage roadImg;
         public double health = 100;
         public double damage = 15;
         public double handicap = 0.4;
@@ -43,47 +43,40 @@ namespace TowerDefense.TowerDefense
         public bool gameFinished = false;
         public static bool Susp = false;
         private Map map;
-        public Game(Canvas canvas, BitmapImage unitImg, BitmapImage towerImg, BitmapImage bulletImg)
+        public Game(Canvas canvas, BitmapImage unitImg, BitmapImage towerImg, BitmapImage bulletImg, BitmapImage roadImg)
         {
             this.gameCanvas = canvas;
             this.unitImg = unitImg;
             this.towerImg = towerImg;
+            this.roadImg = roadImg;
             //tileHeight = Math.Max(this.unitImg.DecodePixelHeight, this.towerImg.DecodePixelHeight);
             //tileWidth = Math.Max(this.unitImg.DecodePixelWidth, this.towerImg.DecodePixelWidth);
             this.map = new Map((int)gameCanvas.Width, (int)canvas.Height, tileWidth, tileHeight);
-            path.Add(map.GetTileCenter(158, 0));
-			path.Add(map.GetTileCenter(158, 32));
-            path.Add(map.GetTileCenter(50, 40));
-			path.Add(map.GetTileCenter(50, 234));
-			path.Add(map.GetTileCenter(154, 234));
-			path.Add(map.GetTileCenter(160, 160));
-			path.Add(map.GetTileCenter(330, 154));
-			path.Add(map.GetTileCenter(334, 334));
-			path.Add(map.GetTileCenter(58, 348));
-			path.Add(map.GetTileCenter(50, 444));
-			path.Add(map.GetTileCenter(440, 460));
-			path.Add(map.GetTileCenter(450, 46));
-			path.Add(map.GetTileCenter(286, 46));
-			path.Add(map.GetTileCenter(286, -50));
-            foreach (Point point in path)
-            {
-                map.SetTileType((int)point.X, (int)point.Y, ObjectType.Path);
-            }
-            for (int i = 0; i < path.Count - 1; ++i)
-            {
-                int divider = 20;
-                int dx = (int)(path[i + 1].X - path[i].X)/divider;
-                int dy = (int)(path[i + 1].Y - path[i].Y)/divider;
-                for (int j = 0; j < divider; ++j)
-                {
-                    map.SetTileType((int)path[i].X + dx * j,
-                        (int)path[i].Y + dy * j, ObjectType.Path);
-
-                }
-            }
+            InitPath();
             this.bulletImg = bulletImg;
+            InitUnits();
+            InitTowers();
             
+            
+            //map.DrawTiles(gameCanvas);
+            map.Images[ObjectType.Path] = this.roadImg;
+            map.DrawMap(gameCanvas);
+            map.DrawTiles(gameCanvas);
+        }
 
+        private void InitTowers()
+        {
+            Point p = map.GetTileCenter(158, 60);
+
+            towers.Add(new Tower(gameCanvas, (int)p.X + tileWidth/2, (int)p.Y + tileHeight, 5, shotDelay, 200, towerImg));
+            foreach (Tower tower in towers)
+            {
+                map.SetTileType(tower.x, tower.y, ObjectType.Tower);
+            }
+        }
+
+        private void InitUnits()
+        {
             Point p = map.GetTileCenter(158, 0);
             units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
             p = map.GetTileCenter(158, -60);
@@ -96,15 +89,44 @@ namespace TowerDefense.TowerDefense
             {
                 map.SetTileType(unit.x, unit.y, ObjectType.Unit);
             }
-            p = map.GetTileCenter(158, 60);
             
-            towers.Add(new Tower(gameCanvas, (int)p.X, (int)p.Y, 5, shotDelay, 200, towerImg));
-            foreach (Tower tower in towers)
+        }
+
+        private void InitPath()
+        {
+            path.Add(map.GetTileCenter(158, 0));
+            path.Add(map.GetTileCenter(158, 32));
+            path.Add(map.GetTileCenter(50, 40));
+            path.Add(map.GetTileCenter(50, 234));
+            path.Add(map.GetTileCenter(154, 234));
+            path.Add(map.GetTileCenter(160, 160));
+            path.Add(map.GetTileCenter(330, 154));
+            path.Add(map.GetTileCenter(334, 334));
+            path.Add(map.GetTileCenter(58, 348));
+            path.Add(map.GetTileCenter(50, 444));
+            path.Add(map.GetTileCenter(440, 460));
+            path.Add(map.GetTileCenter(450, 46));
+            path.Add(map.GetTileCenter(286, 46));
+            path.Add(map.GetTileCenter(286, -50));
+            foreach (Point point in path)
             {
-                map.SetTileType(tower.x, tower.y, ObjectType.Tower);
+                map.SetTileType((int)point.X, (int)point.Y, ObjectType.Path);
             }
-            map.DrawTiles(gameCanvas);
-            //map.DrawMap(gameCanvas);
+            List<Point> newPath = new List<Point>();
+            for (int i = 0; i < path.Count - 1; ++i)
+            {
+                int divider = 20;
+                int dx = (int)(path[i + 1].X - path[i].X) / divider;
+                int dy = (int)(path[i + 1].Y - path[i].Y) / divider;
+                for (int j = 0; j < divider; ++j)
+                {
+                    int curX = (int) path[i].X + dx*j;
+                    int curY = (int) path[i].Y + dy*j;
+                    map.SetTileType(curX, curY, ObjectType.Path);
+                    newPath.Add(new Point(curX,curY));
+                }
+            }
+            path = newPath;
         }
 
         public static BitmapImage ImageFromRelativePath(FrameworkElement parent, string path)
@@ -210,6 +232,8 @@ namespace TowerDefense.TowerDefense
                             towers.Remove(this.towers[i]);
                             i--;
                             isBreak = true;
+                            if(this.towers.Count == 0)
+                                break;
                         }
                     }
 

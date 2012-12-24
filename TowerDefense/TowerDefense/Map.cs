@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Windows.Foundation;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Shapes;
 using Windows.UI.Xaml.Media;
 
@@ -20,7 +21,7 @@ namespace TowerDefense.TowerDefense
     {
         private readonly int _height;
         private readonly List<ObjectType> _map;
-        public Dictionary<ObjectType, ImageSource> _images;
+        public Dictionary<ObjectType, BitmapImage> Images;
 
         private readonly int _tileHeight;
         private readonly int _tileWidth;
@@ -42,7 +43,7 @@ namespace TowerDefense.TowerDefense
             {
                 _map.Add(ObjectType.Empty);
             }
-            _images = new Dictionary<ObjectType,ImageSource>();
+            Images = new Dictionary<ObjectType,BitmapImage>();
         }
 
         public int TotalXTiles
@@ -138,12 +139,12 @@ namespace TowerDefense.TowerDefense
             {
                 for (int j = 0; j < TotalXTiles; ++j)
                 {
-                    int tileX = i * TileHeight;
-                    int tileY = j * TileWidth;
+                    int tileX = j * TileWidth;
+                    int tileY = i * TileHeight;
                     Rectangle curTile = GetTileCoordinates(tileX, tileY);
                     ImageBrush imBrush = new ImageBrush();
-                    imBrush.ImageSource = _images[ObjectType.Path];
-                    if (_map[tileX * i + tileX] == ObjectType.Path)
+                    imBrush.ImageSource = Images[ObjectType.Path];
+                    if (_map[TotalXTiles * i + j] == ObjectType.Path)
                     {
                         curTile.Fill = imBrush;
                         canvas.Children.Add(curTile);

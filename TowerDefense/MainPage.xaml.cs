@@ -41,9 +41,9 @@ namespace TowerDefense
             BitmapImage bulletImg = ImageFromRelativePath(this, "Assets/mario_fireball.png");
 
             BitmapImage mapImg = ImageFromRelativePath(this, "Assets/map.png");
-
+            BitmapImage roadImg = ImageFromRelativePath(this, "Assets/tile.png");
             
-
+            /*
             ImageBrush imBrush = new ImageBrush();
             //ImageBrush imBrush = SolidColorBrush;
             //SolidColorBrush imBrush = new SolidColorBrush();
@@ -56,8 +56,8 @@ namespace TowerDefense
             rect.Width = 500;
             rect.Height = 500;
             gameCanvas.Children.Add(rect);
-
-            game = new Game(gameCanvas, unitImg, towerImg, bulletImg);
+            */
+            game = new Game(gameCanvas, unitImg, towerImg, bulletImg, roadImg);
             
             /*
             //BitmapImage bi = new BitmapImage(new Uri("ms-appdata:///unit.png"));
