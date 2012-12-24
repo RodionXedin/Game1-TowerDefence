@@ -27,8 +27,11 @@ namespace TowerDefense.TowerDefense
         public int kills = 0;
         int delay = 100;
         int delayCount = 0;
+        private int tileHeight = 40;
+        private int tileWidth = 40;
         BitmapImage unitImg;
         BitmapImage towerImg;
+        BitmapImage pathImage;
         public double health = 100;
         public double damage = 15;
         public double handicap = 0.4;
@@ -39,36 +42,69 @@ namespace TowerDefense.TowerDefense
         private int unitCounter = 0;
         public bool gameFinished = false;
         public static bool Susp = false;
-
+        private Map map;
         public Game(Canvas canvas, BitmapImage unitImg, BitmapImage towerImg, BitmapImage bulletImg)
         {
             this.gameCanvas = canvas;
             this.unitImg = unitImg;
             this.towerImg = towerImg;
-            path.Add(new Point(158, 0));
-			path.Add(new Point(158, 32));
-			path.Add(new Point(50, 40));
-			path.Add(new Point(50, 234));
-			path.Add(new Point(154, 234));
-			path.Add(new Point(160, 160));
-			path.Add(new Point(330, 154));
-			path.Add(new Point(334, 334));
-			path.Add(new Point(58, 348));
-			path.Add(new Point(50, 444));
-			path.Add(new Point(440, 460));
-			path.Add(new Point(450, 46));
-			path.Add(new Point(286, 46));
-			path.Add(new Point(286, -50));
-            this.bulletImg = bulletImg;
+            //tileHeight = Math.Max(this.unitImg.DecodePixelHeight, this.towerImg.DecodePixelHeight);
+            //tileWidth = Math.Max(this.unitImg.DecodePixelWidth, this.towerImg.DecodePixelWidth);
+            this.map = new Map((int)gameCanvas.Width, (int)canvas.Height, tileWidth, tileHeight);
+            path.Add(map.GetTileCenter(158, 0));
+			path.Add(map.GetTileCenter(158, 32));
+            path.Add(map.GetTileCenter(50, 40));
+			path.Add(map.GetTileCenter(50, 234));
+			path.Add(map.GetTileCenter(154, 234));
+			path.Add(map.GetTileCenter(160, 160));
+			path.Add(map.GetTileCenter(330, 154));
+			path.Add(map.GetTileCenter(334, 334));
+			path.Add(map.GetTileCenter(58, 348));
+			path.Add(map.GetTileCenter(50, 444));
+			path.Add(map.GetTileCenter(440, 460));
+			path.Add(map.GetTileCenter(450, 46));
+			path.Add(map.GetTileCenter(286, 46));
+			path.Add(map.GetTileCenter(286, -50));
+            foreach (Point point in path)
+            {
+                map.SetTileType((int)point.X, (int)point.Y, ObjectType.Path);
+            }
+            for (int i = 0; i < path.Count - 1; ++i)
+            {
+                int divider = 20;
+                int dx = (int)(path[i + 1].X - path[i].X)/divider;
+                int dy = (int)(path[i + 1].Y - path[i].Y)/divider;
+                for (int j = 0; j < divider; ++j)
+                {
+                    map.SetTileType((int)path[i].X + dx * j,
+                        (int)path[i].Y + dy * j, ObjectType.Path);
 
+                }
+            }
+            this.bulletImg = bulletImg;
             
 
-            units.Add(new Unit(gameCanvas, 158, 0, unitImg, path, health));
-            units.Add(new Unit(gameCanvas, 158, -60, unitImg, path, health));
-            units.Add(new Unit(gameCanvas, 158, -120, unitImg, path, health));
-            units.Add(new Unit(gameCanvas, 158, -180, unitImg, path, health));
-
-            towers.Add(new Tower(gameCanvas, 158, 60, 5, shotDelay, 200, towerImg));
+            Point p = map.GetTileCenter(158, 0);
+            units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
+            p = map.GetTileCenter(158, -60);
+            units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
+            p = map.GetTileCenter(158, -120);
+            units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
+            p = map.GetTileCenter(158, -180);
+            units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
+            foreach (Unit unit in units)
+            {
+                map.SetTileType(unit.x, unit.y, ObjectType.Unit);
+            }
+            p = map.GetTileCenter(158, 60);
+            
+            towers.Add(new Tower(gameCanvas, (int)p.X, (int)p.Y, 5, shotDelay, 200, towerImg));
+            foreach (Tower tower in towers)
+            {
+                map.SetTileType(tower.x, tower.y, ObjectType.Tower);
+            }
+            map.DrawTiles(gameCanvas);
+            //map.DrawMap(gameCanvas);
         }
 
         public static BitmapImage ImageFromRelativePath(FrameworkElement parent, string path)
@@ -81,10 +117,14 @@ namespace TowerDefense.TowerDefense
 
         public void addTower(double x, double y)
         {
-            if (points >= towerCost)
+            if (points >= towerCost && map.GetTileType((int)x, (int)y) == ObjectType.Empty)
             {
                 points -= towerCost;
-                towers.Add(new Tower(gameCanvas, (int)x, (int)y, 5, shotDelay, 200, towerImg));
+                Point p = map.GetTileCenter((int)x, (int)y);
+
+                towers.Add(new Tower(gameCanvas, (int)p.X - tileWidth / 2,
+                    (int)p.Y - tileHeight, 5, shotDelay, 200, towerImg));
+                map.SetTileType((int)p.X, (int)p.Y, ObjectType.Tower);
             }
         }
 
@@ -99,10 +139,14 @@ namespace TowerDefense.TowerDefense
             {
                tower.upgradeShotDelay(shotDelay);
             }
+
         }
         public static void ContinueGame()
         {
             Susp = false;
+            
+
+            
         }
         public static void SuspendGame()
         {
@@ -134,10 +178,14 @@ namespace TowerDefense.TowerDefense
                 }
                 if (delayCount == delay)
                 {
-                    units.Add(new Unit(gameCanvas, 158, 0, unitImg, path, health));
-                    units.Add(new Unit(gameCanvas, 158, -60, unitImg, path, health));
-                    units.Add(new Unit(gameCanvas, 158, -120, unitImg, path, health));
-                    units.Add(new Unit(gameCanvas, 158, -180, unitImg, path, health));
+                    Point p = map.GetTileCenter(158, 0);
+                    units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
+                    p = map.GetTileCenter(158, -60);
+                    units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
+                    p = map.GetTileCenter(158, -120);
+                    units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
+                    p = map.GetTileCenter(158, -180);
+                    units.Add(new Unit(gameCanvas, (int)p.X, (int)p.Y, unitImg, path, health));
                     delayCount = 0;
                 }
                 //ctx.clearRect(0, 0, canvas.width, canvas.height);

@@ -112,6 +112,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TowerDefense\Bullet.cs" />
     <Compile Include="TowerDefense\Game.cs" />
+    <Compile Include="TowerDefense\Map.cs" />
     <Compile Include="TowerDefense\Tower.cs" />
     <Compile Include="TowerDefense\Unit.cs" />
   </ItemGroup>
